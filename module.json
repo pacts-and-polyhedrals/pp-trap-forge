@@ -1,0 +1,24 @@
+{
+  "id": "pp-trap-forge",
+  "title": "Pacts & Polyhedrals: Trap Forge",
+  "description": "GM-placed hidden fantasy traps with animated reveals, original sound cues, damage rolls and save prompts. System-agnostic, with an optional D&D 5e Trapwright class kit (2024 rules, dnd5e 6.x).",
+  "version": "0.10.1",
+  "authors": [
+    {
+      "name": "Asmo, Pacts & Polyhedrals (Ben Vale)",
+      "url": "https://www.patreon.com/pactsandpolyhedrals"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/main.mjs"],
+  "styles": ["styles.css"],
+  "url": "https://github.com/pacts-and-polyhedrals/pp-trap-forge",
+  "manifest": "https://github.com/pacts-and-polyhedrals/pp-trap-forge/releases/latest/download/module.json",
+  "download": "https://github.com/pacts-and-polyhedrals/pp-trap-forge/releases/download/v0.10.1/pp-trap-forge.zip",
+  "bugs": "https://github.com/pacts-and-polyhedrals/pp-trap-forge/issues",
+  "readme": "https://github.com/pacts-and-polyhedrals/pp-trap-forge/blob/main/README.md",
+  "changelog": "https://github.com/pacts-and-polyhedrals/pp-trap-forge/blob/main/CHANGELOG.md"
+}

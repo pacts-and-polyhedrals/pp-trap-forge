@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Trap Forge audiovisual lab</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#1a1618;color:#fdf1d8;font:16px system-ui}#board{position:fixed;inset:0;background:radial-gradient(ellipse at center,#574538 0%,#2b2527 65%,#151419 100%);background-image:repeating-linear-gradient(0deg,#b18c5523 0,#b18c5523 1px,transparent 1px,transparent 64px),repeating-linear-gradient(90deg,#b18c5523 0,#b18c5523 1px,transparent 1px,transparent 64px),radial-gradient(ellipse at center,#574538,#2b2527 72%,#151419 100%);background-position:center}
+#head,#note{position:fixed;z-index:10;padding:16px 28px;width:100%;left:0;background:#1e191deb;border-color:#685641}#head{top:0;border-bottom:1px solid #685641}#note{bottom:0;border-top:1px solid #685641;display:flex;justify-content:space-between}#head h1{font:600 25px Georgia;margin:0;color:#ffe6a6}#head small,#note small{color:#d1c7b0}#head small{display:block;margin-top:6px;text-transform:uppercase;letter-spacing:.19em}#cue{font-weight:700;color:#ffdd92;margin-left:12px}#tile{position:absolute;object-fit:contain;filter:drop-shadow(0 8px 16px #130b0ba0)}
+#paint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:4}#sound{font-size:.9em;background:#423441;border:1px solid #a68146;color:#ffe0aa;border-radius:4px;padding:6px;cursor:pointer}
+</style>
+<div id="board"></div><div id="head"><h1>Pacts &amp; Polyhedrals · Trap Forge</h1><small>Motion and sound preview <span id="cue"></span></small></div>
+<img id="tile" alt=""><canvas id="paint" width="760" height="540"></canvas>
+<div id="note"><small>Actual module artwork and cue renderer · standalone preview, not a live Foundry session</small><button id="sound">Enable audio</button></div>
+<script type="module">
+import {ID} from "../../scripts/core.mjs";
+import {FAMILIES,AV_BASE,artFor,audioFor} from "../../scripts/av-profiles.mjs";
+import {paintEffect} from "../../scripts/av-paint.mjs";
+import {receiveCue,clearEffects,warmAssets} from "../../scripts/av-runtime.mjs";
+const board=document.querySelector("#board"), tile=document.querySelector("#tile"), c=document.querySelector("#paint"), ctx=c.getContext("2d");
+const art={};const audioLog=[];let offset=0,zoom=1,los=true,allowSound=false;
+globalThis.game={user:{id:"p",isGM:false},settings:{get:()=>undefined}};
+globalThis.canvas={ready:true,scene:{id:"training"},level:{id:"A"},visibility:{tokenVision:true,testVisibility:()=>los},clientCoordinatesFromCanvas(pt){return {x:innerWidth/2+(pt.x-500)*zoom+offset,y:innerHeight/2+(pt.y-500)*zoom}}};
+globalThis.foundry={audio:{AudioHelper:{play({src,volume}){audioLog.push(src);if(allowSound){const a=new Audio(src);a.volume=volume;void a.play().catch(e=>console.error(e));}}}}};
+const familyKeys=Object.keys(FAMILIES);
+const loadImage=(key,url)=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{art[key]=img;resolve(img)};img.onerror=reject;img.src=url});
+await Promise.all([...familyKeys.map(k=>loadImage(k,artFor(k))),loadImage("closed",AV_BASE+"/tiles/pit-closed.svg")]);
+warmAssets();
+document.querySelector("#sound").onclick=()=>{allowSound=true;document.querySelector("#sound").textContent="Audio enabled";};
+function reveal(key,position=[0,0],direction=0,tileSize=194){
+ tile.src=art[key].src;
+ tile.style.width=tile.style.height=tileSize+"px";
+ tile.style.left="calc(50% + "+position[0]+"px)";tile.style.top="calc(50% + "+position[1]+"px)";
+ tile.style.transform="translate(-50%,-50%) rotate("+direction+"deg)";
+ document.querySelector("#cue").textContent=FAMILIES[key].title;
+}
+globalThis.lab={
+ families:familyKeys,audioLog,reveal,
+ frame(key,t,{direction=0,show=true,reduced=false}={}){
+  clearEffects();reveal(key,[0,0],direction);
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);
+  if(show){ctx.translate(c.width/2,c.height/2);ctx.rotate(direction*Math.PI/180);ctx.scale(1.94,1.94);paintEffect(ctx,FAMILIES[key],t,{reduced,closedArt:art.closed});}
+  return new Uint32Array(ctx.getImageData(0,0,c.width,c.height).data.buffer).reduce((n,v)=>n+!!v,0);
+ },
+ event(key,id,opts={}){
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);
+  const ref={family:key,scene:"training",level:"A",x:500,y:500,w:178,h:178,rotation:0,gain:.8,sfxOn:true,vfxOn:true,createdAt:Date.now(),markVisible:true,...opts};
+  reveal(key);
+  return receiveCue({id,author:{isGM:true},whisper:[],getFlag:(s,k)=>s===ID&&k==="cue"?ref:null});
+ },
+ move(x,z){offset=x;zoom=z;},
+ fog(on){los=!on;},
+ async audio(){
+  const context=new AudioContext();
+  try{
+   const buffers=await Promise.all(familyKeys.map(async k=>[k,await context.decodeAudioData(await (await fetch(audioFor(k))).arrayBuffer())]));
+   return buffers.map(([k,v])=>[k,v.duration,v.numberOfChannels,v.sampleRate]);
+  } finally {await context.close();}
+ }
+};
+document.body.dataset.ready="yes";
+</script></html>

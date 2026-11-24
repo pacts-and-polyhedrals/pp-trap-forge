@@ -1,0 +1,17 @@
+.tf-form {display:grid;gap:.7rem;max-height:66vh;overflow:auto;padding:.25rem;}
+.tf-form label {display:grid;gap:.18rem;min-width:0;font-weight:600;}
+.tf-form p {margin:.1rem 0 .4rem;}
+.tf-form select[size] {width:100%; min-height:13rem;}
+.tf-form .tf-check {display:flex;align-items:center;font-weight:500;}
+.tf-form .tf-columns {display:grid;gap:.5rem;grid-template-columns:repeat(2,minmax(0,1fr));}
+.tf-form input, .tf-form select, .tf-form textarea {width:100%;min-width:0;}
+.tf-form .tf-check input {width:auto;}
+.tf-preview {min-height:2.6em;}
+.tf-chat {padding:.5rem .55rem;border:1px solid #79563e;border-radius:.25rem;}
+.tf-chat h3 {margin:.1rem 0 .35rem;}
+.tf-actions {display:flex;flex-wrap:wrap;gap:.25rem;}
+.tf-actions button {height:auto;padding:.2rem;}
+/* The board cue is local and never captures a player click; HUD and sidebar remain above. */
+.tf-fx-layer{position:fixed!important;transform:translate(-50%,-50%);pointer-events:none!important;z-index:5;max-width:none!important;max-height:none!important;}
+.tf-form .tf-divider{margin:.65rem 0 .1rem;border-top:1px solid #827360;padding-top:.55rem;font-weight:700;}
+.tf-asset{display:grid;grid-template-columns:1fr auto;align-items:end;gap:.5rem;}
